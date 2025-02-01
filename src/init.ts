@@ -1,27 +1,29 @@
 ﻿const { body } = require('express-validator');
 const multer = require('multer');
 
-const searchController = require('./controllers/searchController');
-const documentsController = require('./controllers/documentsController');
-const adminController = require('./controllers/adminController');
-const collectionsController = require('./controllers/collectionsController');
-const healthCheckController = require('./controllers/healthCheckController');
+const searchController = require('./controllers/search.controller');
+const documentsController = require('./controllers/documents.controller');
+const adminController = require('./controllers/admin.controller');
+const collectionsController = require('./controllers/collections.controller');
+const healthCheckController = require('./controllers/health-check.controller');
 
 const upload = multer({ storage: multer.memoryStorage() });
 export function initializeControllers(app) {
     /**
      * @swagger
-     * /search:
+     * /search/{collection}:
      *   post:
+     *     tags:
+     *       - Search
      *     summary: Perform a vector search.
      *     description: Accepts a text query and returns matching results from the ChromaDB vector database.
      *     parameters:
-     *      - in: path
-     *        name: collection
-     *        required: true
-     *        schema:
-     *          type: string
-     *        description: The collection to query against
+     *       - in: path
+     *         name: collection
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: The collection to query against.
      *     requestBody:
      *       required: true
      *       content:
@@ -29,9 +31,9 @@ export function initializeControllers(app) {
      *           schema:
      *             type: object
      *             required:
-     *               - text
+     *               - query
      *             properties:
-     *               text:
+     *               query:
      *                 type: string
      *                 example: "example query"
      *     responses:
@@ -55,7 +57,7 @@ export function initializeControllers(app) {
      *               properties:
      *                 error:
      *                   type: string
-     *                   example: 'Missing "text" in request body'
+     *                   example: 'Missing "query" in request body'
      *       500:
      *         description: Internal Server Error during vector search.
      *         content:
@@ -69,13 +71,34 @@ export function initializeControllers(app) {
      *                   type: string
      */
     app.post('/search/:collection', searchController.post);
-
+    
     /**
      * @swagger
-     * /documents:
+     * /documents/{collection}:
      *   get:
+     *     tags:
+     *       - Documents
      *     summary: Retrieve documents.
-     *     description: Retrieves a list of documents from the ChromaDB database.
+     *     description: Retrieves a list of documents from the ChromaDB database based on a search query.
+     *     parameters:
+     *       - in: path
+     *         name: collection
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: The name of the collection to query.
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required:
+     *               - query
+     *             properties:
+     *               query:
+     *                 type: string
+     *                 example: "example query"
      *     responses:
      *       200:
      *         description: Documents retrieved successfully.
@@ -99,22 +122,42 @@ export function initializeControllers(app) {
 
     /**
      * @swagger
-     * /documents:
+     * /documents/{collection}:
      *   post:
+     *     tags:
+     *       - Documents
      *     summary: Create a new document.
      *     description: Adds a new document to the ChromaDB database.
+     *     parameters:
+     *       - in: path
+     *         name: collection
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: The collection to which the document will be added.
      *     requestBody:
      *       required: true
      *       content:
-     *         application/json:
+     *         multipart/form-data:
      *           schema:
      *             type: object
      *             required:
-     *               - text
+     *               - metadata
+     *               - file
      *             properties:
-     *               text:
+     *               metadata:
+     *                 type: object
+     *                 description: A key/value object of metadata properties.
+     *                 additionalProperties:
+     *                   oneOf:
+     *                     - type: string
+     *                     - type: number
+     *                     - type: boolean
+     *                 example: { "author": "Alice", "version": 1, "published": true }
+     *               file:
      *                 type: string
-     *                 example: "Document content"
+     *                 format: binary
+     *                 description: The file to be uploaded.
      *     responses:
      *       201:
      *         description: Document created successfully.
@@ -149,11 +192,13 @@ export function initializeControllers(app) {
         '/documents/:collection',
         upload.single('file'),
         documentsController.post);
-
+    
     /**
      * @swagger
      * /documents:
      *   delete:
+     *     tags:
+     *       - Documents
      *     summary: Delete a document.
      *     description: Deletes a document from the ChromaDB database by its identifier.
      *     parameters:
@@ -185,6 +230,8 @@ export function initializeControllers(app) {
      * @swagger
      * /admin:
      *   post:
+     *     tags:
+     *       - Admin
      *     summary: Create an admin resource.
      *     description: Performs an admin operation to create a new resource.
      *     requestBody:
@@ -219,6 +266,8 @@ export function initializeControllers(app) {
      * @swagger
      * /admin:
      *   put:
+     *     tags:
+     *       - Admin
      *     summary: Update an admin resource.
      *     description: Updates an existing admin resource with the provided data.
      *     requestBody:
@@ -258,6 +307,8 @@ export function initializeControllers(app) {
      * @swagger
      * /admin:
      *   delete:
+     *     tags:
+     *       - Admin
      *     summary: Delete an admin resource.
      *     description: Deletes an admin resource from the system by its identifier.
      *     parameters:
@@ -289,6 +340,8 @@ export function initializeControllers(app) {
      * @swagger
      * /collections:
      *   get:
+     *     tags:
+     *       - Collections
      *     summary: Retrieve collections.
      *     description: Retrieves a list of collections from the ChromaDB database.
      *     responses:
@@ -316,6 +369,8 @@ export function initializeControllers(app) {
      * @swagger
      * /collections:
      *   post:
+     *     tags:
+     *       - Collections
      *     summary: Create a new collection.
      *     description: Creates a new collection in the ChromaDB database.
      *     requestBody:
@@ -366,6 +421,8 @@ export function initializeControllers(app) {
      * @swagger
      * /collections:
      *   delete:
+     *     tags:
+     *       - Collections
      *     summary: Delete a collection.
      *     description: Deletes a collection from the ChromaDB database by its identifier.
      *     parameters:
@@ -397,6 +454,8 @@ export function initializeControllers(app) {
      * @swagger
      * /healthcheck:
      *   get:
+     *     tags:
+     *       - Health Check
      *     summary: Check application health.
      *     description: Provides a basic health check for the application. Returns system status, uptime, and the current timestamp if the application is running normally.
      *     responses:

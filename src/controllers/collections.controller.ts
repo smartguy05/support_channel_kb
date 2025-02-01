@@ -4,7 +4,7 @@ import {KbCollection} from "../models/dto/kb-collection";
 import {internalServerError, ok} from "../helpers/controller-helpers";
 
 exports.get = async (req, res) => {
-    const chromaClient = getChromaClient();
+    const chromaClient = await getChromaClient();
     
     const collections = await chromaClient.listCollections();
 
@@ -12,7 +12,7 @@ exports.get = async (req, res) => {
 }
 
 exports.post = async (req, res) => {
-    const chromaClient = getChromaClient();
+    const chromaClient = await getChromaClient();
     const body = req.body as KbCollection;
     
     await chromaClient.createCollection({
@@ -21,7 +21,7 @@ exports.post = async (req, res) => {
             "description": body.description,
             "created": (new Date()).toString()
         },
-        embeddingFunction: new DefaultEmbeddingFunction(process.env.EMBEDDING_FUNCTION)
+        embeddingFunction: new DefaultEmbeddingFunction({ model: process.env.EMBEDDING_FUNCTION})
     });
     
     ok(res);
@@ -29,7 +29,7 @@ exports.post = async (req, res) => {
 
 exports.delete = async (req, res) => {
     const collection = req.params.name;
-    const chromaClient = getChromaClient();
+    const chromaClient = await getChromaClient();
     
     try {
         await chromaClient.deleteCollection(collection);

@@ -1,15 +1,16 @@
-﻿import {getChromaClient} from "../helpers/chroma-helpers";
+﻿import {getDocumentCollection} from '../helpers/chroma-helpers';
 import {RecursiveCharacterTextSplitter} from "@langchain/textsplitters";
-import {DefaultEmbeddingFunction, Documents, Embeddings, IDs, Metadatas, QueryRecordsParams} from "chromadb";
+import {
+    AddRecordsParams,
+    DefaultEmbeddingFunction, DeleteParams,
+    Embeddings,
+    IDs,
+    Metadatas,
+    QueryRecordsParams
+} from "chromadb";
 
 export async function getDocumentList(collection: string) {
-    const chromaClient = getChromaClient();
-    const embeddingFunction = new DefaultEmbeddingFunction(process.env.EMBEDDING_FUNCTION);
-    
-    const documentCollection = await chromaClient.getCollection({
-        name: collection,
-        embeddingFunction
-    });
+    const documentCollection = await getDocumentCollection(collection);
     
     const results = await documentCollection.get({ include: ['metadatas']} as QueryRecordsParams);
     return results.metadatas.map(m => {
@@ -22,11 +23,10 @@ export async function getDocumentList(collection: string) {
 }
 
 export async function addDocument(req) {
-    const chromaClient = getChromaClient();
-    const embeddingFunction = new DefaultEmbeddingFunction(process.env.EMBEDDING_FUNCTION);
+    const embeddingFunction = new DefaultEmbeddingFunction({ model: process.env.EMBEDDING_FUNCTION});
     const text = req.file.buffer.toString('utf-8');
     const fileName = req.file.originalName;
-    const collection: string = req.params.metadata;
+    const collection: string = req.params.collection;
     const metadata: Record<string, string | number | boolean> = req.body.metadata;
     
     // split into chunks
@@ -34,7 +34,8 @@ export async function addDocument(req) {
         chunkSize: 1000,
         chunkOverlap: 200,
     });
-    const documents: Documents = await splitter.createDocuments([text]) as Documents;
+    const documents = await splitter.createDocuments([text]);
+    const pageContents = documents.map(m => m.pageContent);
     
     // generate ids and metadatas
     const ids: IDs = [];
@@ -46,34 +47,24 @@ export async function addDocument(req) {
     }
     
     // create embeddings
-    const embeddings: Embeddings = await embeddingFunction.generate(documents);
+    const embeddings: Embeddings = await embeddingFunction.generate(pageContents);
     
     // get collection
-    const documentCollection = await chromaClient.getCollection({
-        name: collection, 
-        embeddingFunction
-    });
+    const documentCollection = await getDocumentCollection(collection);
 
     await documentCollection.add({
         ids,
         embeddings,
-        metadatas,
-        documents
-    });
+        metadatas
+    } as AddRecordsParams);
 }
 
 export async function deleteDocument(collection: string, filename: string) {
-    const chromaClient = getChromaClient();
-    const embeddingFunction = new DefaultEmbeddingFunction(process.env.EMBEDDING_FUNCTION);
-
-    const documentCollection = await chromaClient.getCollection({
-        name: collection,
-        embeddingFunction
-    });
+    const documentCollection = await getDocumentCollection(collection);
 
     await documentCollection.delete({
         filter: {
             filename
         }
-    } as QueryRecordsParams);
+    } as DeleteParams);
 }
