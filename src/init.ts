@@ -1,10 +1,13 @@
-﻿const { body, validationResult } = require('express-validator');
+﻿const { body } = require('express-validator');
+const multer = require('multer');
+
 const searchController = require('./controllers/searchController');
 const documentsController = require('./controllers/documentsController');
 const adminController = require('./controllers/adminController');
 const collectionsController = require('./controllers/collectionsController');
 const healthCheckController = require('./controllers/healthCheckController');
 
+const upload = multer({ storage: multer.memoryStorage() });
 export function initializeControllers(app) {
     /**
      * @swagger
@@ -92,7 +95,7 @@ export function initializeControllers(app) {
      *                 error:
      *                   type: string
      */
-    app.get('/documents', documentsController.get);
+    app.get('/documents/:collection', documentsController.get);
 
     /**
      * @swagger
@@ -143,7 +146,8 @@ export function initializeControllers(app) {
      *                   type: string
      */
     app.post(
-        '/documents',
+        '/documents/:collection',
+        upload.single('file'),
         documentsController.post);
 
     /**
@@ -175,7 +179,7 @@ export function initializeControllers(app) {
      *       500:
      *         description: Internal Server Error while deleting the document.
      */
-    app.delete('/documents', documentsController.delete);
+    app.delete('/documents/:collection/:filename', documentsController.delete);
 
     /**
      * @swagger

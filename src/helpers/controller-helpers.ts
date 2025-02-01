@@ -13,3 +13,11 @@ export function internalServerError(res, exception?: any, message?: string) {
         res.status(500);   
     }
 }
+
+export function badRequest(res, error?: string) {
+    if (!!error) {
+        res.status(400).json({ error });
+    } else {
+        res.status(400);
+    }
+}
