@@ -2,7 +2,6 @@
 import {RecursiveCharacterTextSplitter} from "@langchain/textsplitters";
 import {
     AddRecordsParams,
-    DeleteParams,
     Embeddings,
     IDs,
     Metadatas,
@@ -66,9 +65,15 @@ export async function addDocument(req) {
 export async function deleteDocument(collection: string, filename: string) {
     const documentCollection = await getDocumentCollection(collection);
 
-    await documentCollection.delete({
-        filter: {
-            filename
-        }
-    } as DeleteParams);
+    // @ts-ignore
+    const results = await documentCollection.query({
+        where: { filename }
+    });
+    
+    const idsToDelete = results.ids.map(m => m[0]);
+
+    // @ts-ignore
+    await documentCollection.delete({ 
+        ids: idsToDelete as IDs
+    });
 }
