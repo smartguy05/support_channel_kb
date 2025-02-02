@@ -26,6 +26,7 @@ exports.post = async (req, res) => {
 exports.delete = async (req, res) => {
     try {
         await deleteDocument(req.params.collection, req.params.filename);
+        return ok(res);
     } catch (e) {
         internalServerError(res, e);
     }

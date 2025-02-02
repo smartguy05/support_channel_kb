@@ -55,11 +55,13 @@ export async function addDocument(req) {
     // get collection
     const documentCollection = await getDocumentCollection(collection);
 
+    // @ts-ignore
     await documentCollection.add({
         ids,
         embeddings,
-        metadatas
-    } as AddRecordsParams);
+        metadatas,
+        documents: pageContents
+    });
 }
 
 export async function deleteDocument(collection: string, filename: string) {
@@ -67,10 +69,11 @@ export async function deleteDocument(collection: string, filename: string) {
 
     // @ts-ignore
     const results = await documentCollection.query({
+        queryTexts: [filename],
         where: { filename }
     });
     
-    const idsToDelete = results.ids.map(m => m[0]);
+    const idsToDelete = results.ids.flat();
 
     // @ts-ignore
     await documentCollection.delete({ 
