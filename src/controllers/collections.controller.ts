@@ -1,5 +1,4 @@
-﻿import {getChromaClient} from "../helpers/chroma-helpers";
-import {DefaultEmbeddingFunction} from "chromadb";
+﻿import {getChromaClient, getEmbeddingFunction} from "../helpers/chroma-helpers";
 import {KbCollection} from "../models/dto/kb-collection";
 import {internalServerError, ok} from "../helpers/controller-helpers";
 
@@ -21,7 +20,7 @@ exports.post = async (req, res) => {
             "description": body.description,
             "created": (new Date()).toString()
         },
-        embeddingFunction: new DefaultEmbeddingFunction({ model: process.env.EMBEDDING_FUNCTION})
+        embeddingFunction: getEmbeddingFunction()
     });
     
     ok(res);

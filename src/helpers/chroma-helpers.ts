@@ -1,4 +1,9 @@
-﻿import {ChromaClient, DefaultEmbeddingFunction, Documents, Embeddings} from "chromadb";
+﻿import {
+    ChromaClient, 
+    Embeddings,
+    IEmbeddingFunction,
+    OpenAIEmbeddingFunction
+} from "chromadb";
 import {RecursiveCharacterTextSplitter} from "@langchain/textsplitters";
 
 export async function getChromaClient() {
@@ -17,7 +22,7 @@ export async function getChromaClient() {
 
 export async function getDocumentCollection(collection: string) {
     const chromaClient = await getChromaClient();
-    const embeddingFunction = new DefaultEmbeddingFunction({ model: process.env.EMBEDDING_FUNCTION});
+    const embeddingFunction = getEmbeddingFunction();
     
     return await chromaClient.getCollection({
         name: collection,
@@ -26,7 +31,7 @@ export async function getDocumentCollection(collection: string) {
 }
 
 export async function getEmbeddings(text: string): Promise<Embeddings> {
-    const embeddingFunction = new DefaultEmbeddingFunction({ model: process.env.EMBEDDING_FUNCTION });
+    const embeddingFunction = getEmbeddingFunction();
 
     // split into chunks
     const splitter = new RecursiveCharacterTextSplitter({
@@ -37,4 +42,11 @@ export async function getEmbeddings(text: string): Promise<Embeddings> {
     const pageContents = documents.map(m => m.pageContent);
 
     return await embeddingFunction.generate(pageContents);
+}
+
+export function getEmbeddingFunction(): IEmbeddingFunction {
+    return new OpenAIEmbeddingFunction({
+        openai_model: process.env.OPEN_AI_EMBEDDING_MODEL,
+        openai_api_key: process.env.OPEN_AI_KEY
+    });
 }

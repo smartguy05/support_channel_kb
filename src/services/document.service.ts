@@ -1,8 +1,8 @@
-﻿import {getDocumentCollection} from '../helpers/chroma-helpers';
+﻿import {getDocumentCollection, getEmbeddingFunction} from '../helpers/chroma-helpers';
 import {RecursiveCharacterTextSplitter} from "@langchain/textsplitters";
 import {
     AddRecordsParams,
-    DefaultEmbeddingFunction, DeleteParams,
+    DeleteParams,
     Embeddings,
     IDs,
     Metadatas,
@@ -13,21 +13,24 @@ export async function getDocumentList(collection: string) {
     const documentCollection = await getDocumentCollection(collection);
     
     const results = await documentCollection.get({ include: ['metadatas']} as QueryRecordsParams);
-    return results.metadatas.map(m => {
-            if ("filename" in m) {
-                return m.filename
-            }
-            return null;
-        })
-        .filter(f => !f);
+    // removes duplicates and null/empty values
+    return Array.from(
+        new Set(
+            results.metadatas
+                .map(m => !m || !("filename" in m)
+                    ? null
+                    : m.filename)
+                .filter(f => !!f)
+        )
+    );
 }
 
 export async function addDocument(req) {
-    const embeddingFunction = new DefaultEmbeddingFunction({ model: process.env.EMBEDDING_FUNCTION});
+    const embeddingFunction = getEmbeddingFunction();
     const text = req.file.buffer.toString('utf-8');
-    const fileName = req.file.originalName;
+    const fileName = req.file.originalname;
     const collection: string = req.params.collection;
-    const metadata: Record<string, string | number | boolean> = req.body.metadata;
+    const metadata: Record<string, string | number | boolean>[] = req.body.metadata;
     
     // split into chunks
     const splitter = new RecursiveCharacterTextSplitter({
@@ -42,8 +45,9 @@ export async function addDocument(req) {
     const metadatas: Metadatas = [];
     
     for (let i = 0; i < documents.length; i++) {
-        ids.push(`${fileName}-${i}`);
-        metadatas.push(metadata);
+        ids.push(`${collection}-${fileName}-${i}`);
+        metadatas.push(...metadata ?? []);
+        metadatas.push({"filename": fileName });
     }
     
     // create embeddings
