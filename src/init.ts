@@ -127,8 +127,14 @@ export function initializeControllers(app) {
      *     tags:
      *       - Documents
      *     summary: Create a new document.
+     *     consumes:
+     *       - multipart/form-data
      *     description: Adds a new document to the ChromaDB database.
      *     parameters:
+     *       - in: formData
+     *         name: file
+     *         type: file
+     *         description: The file to upload
      *       - in: path
      *         name: collection
      *         required: true
@@ -190,6 +196,12 @@ export function initializeControllers(app) {
      */
     app.post(
         '/documents/:collection',
+        /* #swagger.consumes = ['multipart/form-data'] */
+        /* #swagger.parameters['file'] = { 
+              in: 'formData', 
+              type: 'file', 
+              description: 'The file to upload' 
+        } */
         upload.single('file'),
         documentsController.post);
     

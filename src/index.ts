@@ -1,6 +1,7 @@
-﻿const express = require('express');
+﻿import {initializeControllers} from "./init";
+
+const express = require('express');
 const swaggerUi = require('swagger-ui-express');
-const { initializeControllers } = require('./init');
 require('dotenv').config();
 
 const app = express();

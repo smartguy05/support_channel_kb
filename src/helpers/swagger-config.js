@@ -1,4 +1,4 @@
-﻿
+﻿const path = require('path');
 const swaggerAutogen = require('swagger-autogen')();
 
 const doc = {
@@ -10,13 +10,12 @@ const doc = {
     schemes: ['http'],
 };
 
-const outputFile = '../swagger_output.json';
-// List the files that contain your endpoints (you can add more files if needed)
-const endpointsFiles = ['../init.ts']; // adjust this path to your main file (or files) with your routes
+// Build absolute paths relative to the location of this file
+const outputFile = path.join(__dirname, '../swagger_output.json');
+const endpointsFiles = [ path.join(__dirname, '../init.js') ];
 
 swaggerAutogen(outputFile, endpointsFiles, doc).then(() => {
-    // Optionally, you can automatically start your app after generating the documentation
     console.log('Swagger documentation generated successfully.');
-    // If you want to start your app automatically:
-    // require('./dist/app.js'); // if you compile TS to dist, or use ts-node if desired
+    // Optionally start your app automatically:
+    // require(path.join(__dirname, '../../dist/app.js'));
 });
