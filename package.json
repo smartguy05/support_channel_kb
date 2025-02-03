@@ -5,8 +5,8 @@
   "scripts": {
     "swagger-gen": "node ./dist/helpers/swagger-config.js",
     "build": "tsc",
-    "debug": "tsc && npm run swagger-gen && node --inspect dist/index.js\n",
-    "serve": "tsc && npm run swagger-gen && node ./dist/index.js",
+    "debug": "tsc && npm run swagger-gen && node --inspect=127.0.0.1:9222 dist/index.js",
+    "serve": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -20,6 +20,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-validator": "^7.2.1",
+    "mongodb": "^6.13.0",
     "multer": "^1.4.5-lts.1",
     "openai": "^4.82.0"
   },

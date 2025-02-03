@@ -15,6 +15,9 @@ export function initializeControllers(app) {
             #swagger.tags = ['Search']
             #swagger.summary = 'Search for related kb content'
             #swagger.description = 'Searches kb articles to find relevant content based on search'
+            #swagger.security = [{
+                "Bearer": []
+            }]
             #swagger.parameters['collection'] = {
               in: 'path',
               description: 'Name of the collection the file is in',
@@ -87,28 +90,40 @@ export function initializeControllers(app) {
             } 
         */
         documentsController.delete);
-    
-    app.post('/admin',
+
+    app.get('/admin',
         /* 
           #swagger.tags = ['Admin']
-          #swagger.summary = 'Post'
-          #swagger.description = 'Something admin-y'
+          #swagger.summary = 'Get API Keys'
+          #swagger.description = 'Get KB api keys'
+        */
+        adminController.get);
+    
+    app.post('/admin/:collection',
+        /* 
+          #swagger.tags = ['Admin']
+          #swagger.summary = 'Add KB api key'
+          #swagger.description = 'Add KB api key'
+          #swagger.parameters['collection'] = {
+              in: 'path',
+              description: 'Name of the collection to create an API key for',
+              required: true,
+              type: 'string'
+            }
         */
         adminController.post);
 
-    app.put('/admin',
+    app.delete('/admin/:collection',
         /* 
           #swagger.tags = ['Admin']
-          #swagger.summary = 'Put'
-          #swagger.description = 'Something admin-y'
-        */
-        adminController.put);
-
-    app.delete('/admin',
-        /* 
-          #swagger.tags = ['Admin']
-          #swagger.summary = 'Delete'
-          #swagger.description = 'Something admin-y'
+          #swagger.summary = 'Delete KB api key'
+          #swagger.description = 'Delete KB api key'
+          #swagger.parameters['collection'] = {
+              in: 'path',
+              description: 'Name of the collection to delete an API key for',
+              required: true,
+              type: 'string'
+            }
         */
         adminController.delete);
     

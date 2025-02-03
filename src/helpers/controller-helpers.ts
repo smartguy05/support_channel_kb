@@ -21,3 +21,7 @@ export function badRequest(res, error?: string) {
         res.status(400);
     }
 }
+
+export function notAuthorized(res) {
+    res.status(401).send('API Key missing');
+}

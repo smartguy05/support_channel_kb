@@ -1,24 +1,27 @@
 ﻿import {initializeControllers} from "./init";
-
-const express = require('express');
-const swaggerUi = require('swagger-ui-express');
+import {DbAdapter} from "./models/db-adapter.model";
 require('dotenv').config();
 
+const express = require('express');
 const app = express();
 
 // Middleware to parse JSON bodies
 app.use(express.json());
 
-const swaggerDoc = require('./swagger_output.json');
+if (process.env.SWAGGER_ENABLED) {
+    const swaggerUi = require('swagger-ui-express');
+    const swaggerDoc = require('./swagger_output.json');
 
-// Setup Swagger UI at /docs
-// app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
+    app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
+}
 
 initializeControllers(app);
 
-// Start the server on port 3000 (or a port specified in the environment variables)
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`ChromaDB search API server is running on port ${PORT}`);
-});
+console.log('Initializing db adapter');
+DbAdapter.init(process.env.MONGO_DB_SCHEMA).then(() => {
+    console.log('Db adapter initialized');
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`Support Channel KB API server is running on port ${PORT}`);
+    });
+})

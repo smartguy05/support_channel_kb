@@ -22,9 +22,9 @@ OPEN_AI_EMBEDDING_MODEL=text-embedding-3-small
 ```~~~~
 - Port is the port the api will run on
 - Chroma_url is the url of your docker instance running chromadb
+```
 
 To run locally:
-```
 npm run serve
 ```
 To generate Swagger Docs:

@@ -12,9 +12,9 @@ export async function deleteCollection(collection: string): Promise<void> {
 export async function createCollection(kbCollection: KbCollection): Promise<void> {
     const chromaClient = await getChromaClient();
     
-    if (!(await collectionExists(chromaClient, kbCollection.name))) {
+    if (!(await collectionExists(chromaClient, kbCollection.name?.toLowerCase()))) {
         await chromaClient.createCollection({
-            name: kbCollection.name,
+            name: kbCollection.name?.toLowerCase(),
             metadata: {
                 "description": kbCollection.description,
                 "created": (new Date()).toString()

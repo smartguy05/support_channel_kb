@@ -8,6 +8,14 @@ const doc = {
     },
     host: 'localhost:3000',
     schemes: ['http'],
+    securityDefinitions: {
+        Bearer: {
+            type: 'apiKey',
+            name: 'Authorization',
+            in: 'header',
+            description: 'Api key for kb channel request in format "Bearer UUID"'
+        }
+    }
 };
 
 // Build absolute paths relative to the location of this file
