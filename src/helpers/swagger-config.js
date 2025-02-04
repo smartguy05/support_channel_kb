@@ -3,8 +3,8 @@ const swaggerAutogen = require('swagger-autogen')();
 
 const doc = {
     info: {
-        title: 'ChromaDB API',
-        description: 'API endpoints for ChromaDB operations.',
+        title: 'Support Collections API',
+        description: 'API endpoints for Support Collections',
     },
     host: 'localhost:3000',
     schemes: ['http'],

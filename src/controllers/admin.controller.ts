@@ -12,14 +12,15 @@ exports.get = async (req, res) => {
     }
 }
 
-// exports.find = async (req, res) => {
-//     try {
-//         const result = await DbAdapter.find();
-//         ok(res, result);
-//     } catch (e) {
-//         internalServerError(res, e);
-//     }
-// }
+exports.find = async (req, res) => {
+    try {
+        const collection = req.params.collection?.toLowerCase();
+        const result = await DbAdapter.first({collection})
+        ok(res, result?.api_key ?? '');
+    } catch (e) {
+        internalServerError(res, e);
+    }
+}
 
 exports.post = async (req, res) => {
     try {

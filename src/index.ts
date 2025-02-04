@@ -1,11 +1,13 @@
 ﻿import {initializeControllers} from "./init";
 import {DbAdapter} from "./models/db-adapter.model";
+import cors from 'cors';
 require('dotenv').config();
 
 const express = require('express');
 const app = express();
 
 // Middleware to parse JSON bodies
+app.use(cors());
 app.use(express.json());
 
 if (process.env.SWAGGER_ENABLED) {

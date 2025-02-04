@@ -98,6 +98,20 @@ export function initializeControllers(app) {
           #swagger.description = 'Get KB api keys'
         */
         adminController.get);
+
+    app.get('/admin/:collection',
+        /* 
+          #swagger.tags = ['Admin']
+          #swagger.summary = 'Get API Key of a collection'
+          #swagger.description = 'Get KB api key of the supplied collection'
+          #swagger.parameters['collection'] = {
+              in: 'path',
+              description: 'Name of the collection to create an API key for',
+              required: true,
+              type: 'string'
+            }
+        */
+        adminController.find);
     
     app.post('/admin/:collection',
         /* 
