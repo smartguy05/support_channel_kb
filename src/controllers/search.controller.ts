@@ -16,7 +16,15 @@ exports.post = async (req, res) => {
 }
 
 export async function validateApiKey(req): Promise<boolean> {
-    const api_key = req.headers.authorization;
+    const authHeader = req.headers.authorization;
+    const split = authHeader.split(' ');
+    let api_key: string;
+
+    if (split.length > 1) {
+        api_key = split[1];
+    } else  {
+        api_key = split[0];
+    }
     const collection = req.params.collection?.toLowerCase();
     if (!api_key || !collection) {
         return false;
