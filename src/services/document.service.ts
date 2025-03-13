@@ -23,8 +23,7 @@ export async function getDocumentList(collection: string): Promise<(string | num
 
 export async function getDocumentDetails(collection: string, document: string) {
     const documentCollection = await getDocumentCollection(collection);
-    return await documentCollection.get({ 
-        
+    return await documentCollection.get({
         where: { filename: document }
     });
 }
@@ -153,6 +152,7 @@ async function parseMd(req): Promise<TextData> {
     }
 }
 
+// todo: fix
 async function parsePdf(req): Promise<TextData> {
     return new Promise<TextData>(async (resolve, reject) => {
         const filename = req.file.originalname;

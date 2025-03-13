@@ -15,7 +15,7 @@ exports.getDetails = async (req, res) => {
         const document = req.params.document;
         const collection = req.params.collection;
         const result = await getDocumentDetails(collection, document);
-        if (!result || !result.metadatas) {
+        if (!result) {
             return badRequest(res, 'Document details not found');
         }
         ok(res, result);
