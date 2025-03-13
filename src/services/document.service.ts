@@ -1,11 +1,6 @@
 ﻿import {getDocumentCollection, getEmbeddingFunction} from '../helpers/chroma-helpers';
 import {RecursiveCharacterTextSplitter} from "@langchain/textsplitters";
-import {
-    Embeddings,
-    IDs,
-    Metadatas,
-    QueryRecordsParams
-} from "chromadb";
+import {Embeddings, IDs, Metadatas, QueryRecordsParams} from "chromadb";
 import * as path from "node:path";
 import {TextData} from "../models/text-data";
 import {PdfReader} from "pdfreader";
@@ -24,6 +19,14 @@ export async function getDocumentList(collection: string): Promise<(string | num
                 .filter(f => !!f)
         )
     );
+}
+
+export async function getDocumentDetails(collection: string, document: string) {
+    const documentCollection = await getDocumentCollection(collection);
+    return await documentCollection.get({ 
+        
+        where: { filename: document }
+    });
 }
 
 export async function addDocument(req): Promise<void> {

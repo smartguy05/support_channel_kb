@@ -1,10 +1,24 @@
 ﻿import {badRequest, internalServerError, ok} from "../helpers/controller-helpers";
-import {addDocument, deleteDocument, getDocumentList} from "../services/document.service";
+import {addDocument, deleteDocument, getDocumentDetails, getDocumentList} from "../services/document.service";
 
 exports.get = async (req, res) => {
     try {
         const fileNames = await getDocumentList(req.params.collection);
         ok(res, fileNames);
+    } catch (e) {
+        internalServerError(res, e);
+    }
+};
+
+exports.getDetails = async (req, res) => {
+    try {
+        const document = req.params.document;
+        const collection = req.params.collection;
+        const result = await getDocumentDetails(collection, document);
+        if (!result || !result.metadatas) {
+            return badRequest(res, 'Document details not found');
+        }
+        ok(res, result);
     } catch (e) {
         internalServerError(res, e);
     }

@@ -49,6 +49,36 @@ export function initializeControllers(app) {
         */
         documentsController.get);
 
+    app.get('/documents/:collection/:document',
+        /* 
+			#swagger.tags = ['Documents']
+			#swagger.summary = 'Get Document Details'
+			#swagger.description = 'Retrieves detailed information of a specific document within a collection.'
+			#swagger.security = [{
+				"Bearer": []
+			}]
+			#swagger.parameters['collection'] = {
+			  in: 'path',
+			  description: 'Name of the collection the document belongs to',
+			  required: true,
+			  type: 'string'
+			}
+			#swagger.parameters['document'] = {
+			  in: 'path',
+			  description: 'Name of the document to retrieve details for',
+			  required: true,
+			  type: 'string'
+			}
+			#swagger.responses[200] = {
+			  description: 'Successful retrieval of document details',
+			  schema: { $ref: '#/definitions/DocumentDetails' }
+			}
+			#swagger.responses[500] = {
+			  description: 'Internal server error'
+			}
+		*/
+        documentsController.getDetails);
+
     app.post(
         '/documents/:collection',
         /* 
