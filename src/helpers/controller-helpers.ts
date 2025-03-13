@@ -4,21 +4,22 @@ export function ok(res, body: any = { message: 'Ok'}) {
 }
 
 export function internalServerError(res, exception?: any, message?: string) {
+    message ??= exception.message;
     if (!!exception) {
         console.error(exception);
     }
     if (!!message) {
-        res.status(500).json({ message });
+        res.status(500).send({ message});
     } else {
-        res.status(500);   
+        res.status(500).send();   
     }
 }
 
 export function badRequest(res, error?: string) {
     if (!!error) {
-        res.status(400).json({ error });
+        res.status(400).send({ error });
     } else {
-        res.status(400);
+        res.status(400).send();
     }
 }
 
