@@ -63,6 +63,15 @@ export async function addDocument(req): Promise<void> {
     });
 }
 
+export async function addDocuments(req): Promise<void> {
+    const promises = [];
+    for (let x = 0; x < req.files.length; x++) {
+        req.file = req.files[x];
+        promises.push(addDocument(req));
+    }
+    await Promise.all(promises);
+}
+
 export async function deleteDocument(collection: string, filename: string): Promise<void> {
     const documentCollection = await getDocumentCollection(collection);
 
@@ -122,34 +131,58 @@ async function parseMd(req): Promise<TextData> {
     const collection: string = req.params.collection;
     const metadata: Record<string, string | number | boolean>[] = req.body.metadata;
 
-    // split into chunks
+    const headingRegex = /^(#{1,6})\s+(.*)$/gm;
+    let match;
+    let lastIndex = 0;
+    const sections: { heading: string; content: string }[] = [];
+
+    while ((match = headingRegex.exec(text)) !== null) {
+        if (lastIndex !== match.index) {
+            const content = text.slice(lastIndex, match.index).trim();
+            if (sections.length > 0) {
+                sections[sections.length - 1].content += `\n${content}`;
+            }
+        }
+        sections.push({ heading: match[2].trim(), content: '' });
+        lastIndex = headingRegex.lastIndex;
+    }
+
+    // Add remaining text
+    const remaining = text.slice(lastIndex).trim();
+    if (remaining && sections.length > 0) {
+        sections[sections.length - 1].content += `\n${remaining}`;
+    }
+
+    const documents: string[] = [];
+    const ids: IDs = [];
+    const metadatas: Metadatas = [];
     const splitter = new RecursiveCharacterTextSplitter({
         chunkSize: 1000,
         chunkOverlap: 200,
     });
-    const docs = await splitter.createDocuments([text]);
-    const documents = docs.map(m => m.pageContent);
 
-    // generate ids and metadatas
-    const ids: IDs = [];
-    const metadatas: Metadatas = [];
-
-    for (let i = 0; i < docs.length; i++) {
-        ids.push(`${collection}-${filename}-${i}`);
-        // @ts-ignore
-        metadatas.push({
-            ...metadata,
-            filename,
-            page: 1,
-            added: (new Date()).toISOString()
-        });
+    for (const [sectionIndex, section] of sections.entries()) {
+        const splitDocs = await splitter.createDocuments([section.content]);
+        for (const [docIndex, doc] of splitDocs.entries()) {
+            const uniqueId = `${collection}-${filename}-${section.heading.replace(/\s+/g, '_')}-${sectionIndex}-${docIndex}`;
+            ids.push(uniqueId);
+            documents.push(doc.pageContent);
+            // @ts-ignore
+            metadatas.push({
+                ...metadata,
+                filename,
+                page: 1,
+                added: new Date().toISOString(),
+                heading: section.heading,
+            });
+        }
     }
 
     return {
         metadatas,
         documents,
-        ids
-    }
+        ids,
+    };
 }
 
 // todo: fix

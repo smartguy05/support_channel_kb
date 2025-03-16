@@ -1,5 +1,10 @@
 ﻿import {badRequest, internalServerError, ok} from "../helpers/controller-helpers";
-import {addDocument, deleteDocument, getDocumentDetails, getDocumentList} from "../services/document.service";
+import {
+    addDocuments,
+    deleteDocument,
+    getDocumentDetails,
+    getDocumentList
+} from "../services/document.service";
 
 exports.get = async (req, res) => {
     try {
@@ -26,11 +31,12 @@ exports.getDetails = async (req, res) => {
 
 exports.post = async (req, res) => {
     try {
-        if (!req.file) {
-            badRequest(res, 'No file uploaded');
+        if (!req.files?.length) {
+            badRequest(res, 'No files uploaded');
         }
-
-        await addDocument(req)
+        
+        await addDocuments(req);
+        
         ok(res);
     } catch (e) {
         internalServerError(res, e);

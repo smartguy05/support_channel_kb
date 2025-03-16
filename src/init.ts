@@ -98,7 +98,7 @@ export function initializeControllers(app) {
               type: 'string'
             } 
         */
-        upload.single('file'),
+        upload.array('files', 10),
         documentsController.post);
     
     app.delete('/documents/:collection/:filename',
