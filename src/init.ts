@@ -1,4 +1,7 @@
-﻿const { body } = require('express-validator');
+﻿import * as path from "node:path";
+import * as fs from "node:fs";
+
+const { body } = require('express-validator');
 const multer = require('multer');
 
 const searchController = require('./controllers/search.controller');
@@ -7,7 +10,31 @@ const adminController = require('./controllers/admin.controller');
 const collectionsController = require('./controllers/collections.controller');
 const healthCheckController = require('./controllers/health-check.controller');
 
-const upload = multer({ storage: multer.memoryStorage() });
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        // Define your upload folder
+        const uploadPath = path.join(__dirname, 'uploads');
+
+        // Create the folder if it doesn't exist
+        if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+        }
+
+        // Tell multer where to store files
+        cb(null, uploadPath);
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 100 * 1024 * 1024 // 100MB
+    }
+});
+
 export function initializeControllers(app) {
     
     app.post('/search/:collection',
@@ -98,7 +125,7 @@ export function initializeControllers(app) {
               type: 'string'
             } 
         */
-        upload.array('files', 10),
+        upload.array('files', 20),
         documentsController.post);
     
     app.delete('/documents/:collection/:filename',

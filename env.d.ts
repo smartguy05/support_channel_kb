@@ -8,5 +8,6 @@
         MONGO_DB_URL: string;
         MONGO_DB_SCHEMA: string;
         MONGO_DB_PASSWORD: string;
+        PDF_MODEL: string;
     }
 }
