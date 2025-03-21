@@ -5,9 +5,15 @@ import {createCollection, deleteCollection} from "../services/collection.service
 
 exports.get = async (req, res) => {
     const chromaClient = await getChromaClient();
-    const collections = await chromaClient.listCollections();
+    const collections = await chromaClient.listCollectionsAndMetadata();
 
-    ok(res, collections);
+    const formattedCollections = collections.map(collection => ({
+        name: collection.name,
+        description: collection.metadata?.description || '',
+        created: collection.metadata?.created || ''
+    }));
+
+    ok(res, formattedCollections);
 }
 
 exports.post = async (req, res) => {
