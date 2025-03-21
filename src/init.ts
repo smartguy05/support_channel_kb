@@ -131,7 +131,31 @@ export function initializeControllers(app) {
         upload.array('files', 20),
         documentsController.post);
 
-    
+    app.post('/text/:collection',
+        /* 
+			#swagger.tags = ['Documents']
+			#swagger.summary = 'Add plain text to collection'
+			#swagger.description = 'Adds plain text content to a specified collection'
+			#swagger.parameters['collection'] = {
+				in: 'path',
+				description: 'Name of the collection to add text to',
+				required: true,
+				type: 'string'
+			}
+			#swagger.parameters['body'] = {
+              in: 'body',
+              description: 'Text information to add to kb',
+              required: true,
+              schema: {
+                  text: "Text to save",
+                  data: "A description for the information",
+                  metadata: [{ "key": "value" }]
+              }
+          }
+		*/
+        documentsController.postText);
+
+
     app.delete('/documents/:collection/:filename',
         /* 
             #swagger.tags = ['Documents']

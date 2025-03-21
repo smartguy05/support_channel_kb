@@ -1,6 +1,6 @@
 ﻿import {badRequest, internalServerError, ok} from "../helpers/controller-helpers";
 import {
-    addDocuments,
+    addDocuments, addPlainText,
     deleteDocument,
     getDocumentDetails,
     getDocumentList
@@ -37,6 +37,26 @@ exports.post = async (req, res) => {
         
         await addDocuments(req);
         
+        ok(res);
+    } catch (e) {
+        internalServerError(res, e);
+    }
+}
+
+exports.postText = async (req, res) => {
+    try {
+        if (!req.params.collection) {
+            badRequest(res, 'No collection provided');
+        }
+        if (!req.body.text) {
+            badRequest(res, 'No text provided');
+        }
+        if (!req.body.data) {
+            badRequest(res, 'No text information provided');
+        }
+
+        await addPlainText(req);
+
         ok(res);
     } catch (e) {
         internalServerError(res, e);
