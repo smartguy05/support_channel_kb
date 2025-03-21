@@ -110,23 +110,27 @@ export function initializeControllers(app) {
         '/documents/:collection',
         /* 
             #swagger.tags = ['Documents']
-            #swagger.summary = 'Add new document'
-            #swagger.description = 'Adds document to specified collection'
+            #swagger.summary = 'Add new documents'
+            #swagger.description = 'Adds multiple documents to specified collection'
             #swagger.consumes = ['multipart/form-data']
-            #swagger.parameters['file'] = { 
+            #swagger.parameters['files'] = { 
               in: 'formData', 
-              type: 'file', 
-              description: 'The file to upload' 
+              type: 'array', 
+              items: {
+                type: 'file'
+              },
+              description: 'Files to upload (max 20)' 
             }
             #swagger.parameters['collection'] = {
               in: 'path',
-              description: 'Name of the collection to add the document to',
+              description: 'Name of the collection to add the documents to',
               required: true,
               type: 'string'
             } 
         */
         upload.array('files', 20),
         documentsController.post);
+
     
     app.delete('/documents/:collection/:filename',
         /* 
