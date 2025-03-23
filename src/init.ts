@@ -264,6 +264,36 @@ export function initializeControllers(app) {
         ],
         collectionsController.post);
 
+    app.post(
+        '/collections/key',
+        /* 
+          #swagger.tags = ['Collections']
+          #swagger.summary = 'Create a new KB collection and assign a new API key'
+          #swagger.description = 'Endpoint to create a new knowledge base collection and assign a new api key'
+          #swagger.parameters['body'] = {
+              in: 'body',
+              description: 'KbCollection payload',
+              required: true,
+              schema: {
+                  name: "Sample Collection",
+                  description: "A description for the collection"
+              }
+          }
+        */
+        [
+            body('name')
+                .exists({ checkNull: true, checkFalsy: true })
+                .withMessage('Collection name is required')
+                .isString()
+                .withMessage('Collection name must be a string'),
+            body('description')
+                .exists({ checkNull: true, checkFalsy: true })
+                .withMessage('Description is required')
+                .isString()
+                .withMessage('Description must be a string')
+        ],
+        collectionsController.postWithKey);
+
     app.delete('/collections/:name',
         /* 
           #swagger.tags = ['Collections']
