@@ -131,7 +131,31 @@ export function initializeControllers(app) {
         upload.array('files', 20),
         documentsController.post);
 
-    
+    app.post('/text/:collection',
+        /* 
+			#swagger.tags = ['Documents']
+			#swagger.summary = 'Add plain text to collection'
+			#swagger.description = 'Adds plain text content to a specified collection'
+			#swagger.parameters['collection'] = {
+				in: 'path',
+				description: 'Name of the collection to add text to',
+				required: true,
+				type: 'string'
+			}
+			#swagger.parameters['body'] = {
+              in: 'body',
+              description: 'Text information to add to kb',
+              required: true,
+              schema: {
+                  text: "Text to save",
+                  data: "A description for the information",
+                  metadata: [{ "key": "value" }]
+              }
+          }
+		*/
+        documentsController.postText);
+
+
     app.delete('/documents/:collection/:filename',
         /* 
             #swagger.tags = ['Documents']
@@ -239,6 +263,36 @@ export function initializeControllers(app) {
                 .withMessage('Description must be a string')
         ],
         collectionsController.post);
+
+    app.post(
+        '/collections/key',
+        /* 
+          #swagger.tags = ['Collections']
+          #swagger.summary = 'Create a new KB collection and assign a new API key'
+          #swagger.description = 'Endpoint to create a new knowledge base collection and assign a new api key'
+          #swagger.parameters['body'] = {
+              in: 'body',
+              description: 'KbCollection payload',
+              required: true,
+              schema: {
+                  name: "Sample Collection",
+                  description: "A description for the collection"
+              }
+          }
+        */
+        [
+            body('name')
+                .exists({ checkNull: true, checkFalsy: true })
+                .withMessage('Collection name is required')
+                .isString()
+                .withMessage('Collection name must be a string'),
+            body('description')
+                .exists({ checkNull: true, checkFalsy: true })
+                .withMessage('Description is required')
+                .isString()
+                .withMessage('Description must be a string')
+        ],
+        collectionsController.postWithKey);
 
     app.delete('/collections/:name',
         /* 

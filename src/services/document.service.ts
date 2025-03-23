@@ -41,7 +41,7 @@ export async function addDocument(req): Promise<void> {
             fileData = await parsePdf(req);
             break;
         default:
-            fileData = await parsePlainText(req);
+            fileData = await parseTextFile(req);
     }
     
     if (!fileData || !fileData.documents?.length) {
@@ -72,6 +72,56 @@ export async function addDocuments(req): Promise<void> {
     await Promise.all(promises);
 }
 
+export async function addPlainText(req): Promise<void> {
+    const text = req.body.text;
+    const filename = req.body.data;
+    const collection: string = req.params.collection;
+    const metadata: Record<string, string | number | boolean>[] = req.body.metadata;
+
+    // split into chunks
+    const splitter = new RecursiveCharacterTextSplitter({
+        chunkSize: 300,
+        chunkOverlap: 75,
+    });
+    const docs = await splitter.createDocuments([text]);
+    const documents = docs.map(m => m.pageContent);
+
+    // generate ids and metadatas
+    const ids: IDs = [];
+    const metadatas: Metadatas = [];
+
+    for (let i = 0; i < docs.length; i++) {
+        ids.push(`${collection}-${filename}-${i}`);
+        // @ts-ignore
+        metadatas.push({
+            ...metadata,
+            filename,
+            page: 1,
+            added: (new Date()).toISOString()
+        });
+    }
+
+    const fileData = {
+        metadatas,
+        documents,
+        ids
+    };
+    
+    // create embeddings
+    const embeddings: Embeddings = await getEmbeddingFunction().generate(fileData.documents);
+
+    // get collection
+    const documentCollection = await getDocumentCollection(collection);
+
+    // @ts-ignore
+    await documentCollection.add({
+        ids: fileData.ids,
+        embeddings,
+        metadatas: fileData.metadatas,
+        documents: fileData.documents
+    });
+}
+
 export async function deleteDocument(collection: string, filename: string): Promise<void> {
     const documentCollection = await getDocumentCollection(collection);
 
@@ -88,7 +138,7 @@ export async function deleteDocument(collection: string, filename: string): Prom
     }
 }
 
-async function parsePlainText(req): Promise<TextData> {
+async function parseTextFile(req): Promise<TextData> {
     const text = req.file.buffer.toString('utf-8');
     const filename = req.file.originalname;
     const collection: string = req.params.collection;
